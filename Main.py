@@ -2,6 +2,8 @@ import time
 import RPi.GPIO as GPIO
 import PyFiglet
 
+print(figlet_format("Made by Thomas", font="big"))
+
 GPIO.setmode(GPIO.BCM)
 GPIO.setwarnings(False)
 
