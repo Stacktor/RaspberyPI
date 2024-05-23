@@ -66,6 +66,7 @@ def measure_distance():
         if water_level_percentage >= CRITICAL_WATER_LEVEL:
             control_pump(True)
             send_notification(f"Wasserstand kritisch: {water_level_percentage:.2f}%")
+            time.sleep(5)
         elif water_level_percentage < SAFE_WATER_LEVEL and pumpe_eingeschaltet:
             control_pump(False)
         
