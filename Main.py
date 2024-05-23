@@ -12,8 +12,8 @@ bridge_ip = '192.168.0.137'
 b = Bridge(bridge_ip)
 b.connect()
 
-pushover_user_key = 'DEIN_Pushover_USER_KEY'
-pushover_api_token = 'DEIN_Pushover_API_TOKEN'
+pushover_user_key = 'ua9k2jykcr83sxapyg8of9w33hzf9o'
+pushover_api_token = 'a4naf84gen6td7yyw21tn7s5qn7yho'
 
 client = Client(pushover_user_key, api_token=pushover_api_token)
 
@@ -22,7 +22,7 @@ GPIO.setup(TRIG, GPIO.OUT)
 GPIO.setup(ECHO, GPIO.IN)
 
 MAX_WATER_LEVEL = 30.0  # Maximaler Wasserstand in cm
-CRITICAL_WATER_LEVEL = 95.0  # Kritischer Wasserstand in Prozent
+CRITICAL_WATER_LEVEL = 80.0  # Kritischer Wasserstand in Prozent
 SAFE_WATER_LEVEL = 50.0  # Sicherer Wasserstand in Prozent
 
 pumpe_eingeschaltet = False
