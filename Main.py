@@ -31,7 +31,6 @@ def get_distance():
     GPIO.output(TRIG, True)
     time.sleep(0.00001)
     GPIO.output(TRIG, False)
-    everythreehour = True
 
     while GPIO.input(ECHO) == 0:
         start_time = time.time()
@@ -73,11 +72,6 @@ def measure_distance():
         
         print(f"Water Level: {water_level_percentage:.2f}%")
         time.sleep(1)
-
-def everythreehour():
-    while True:
-        send_notification("Akuteller Wasserstand: {water_level_percentage:.2f}%")
-        time.sleep(10)
 
 
 try:
