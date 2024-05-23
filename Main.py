@@ -45,7 +45,7 @@ def get_distance():
 def control_pump(turn_on):
     global pumpe_eingeschaltet
     lights = b.get_light_objects('name')
-    pump_light = lights['PumpSocket']
+    pump_light = lights['Pumpe']
 
     if turn_on and not pumpe_eingeschaltet:
         pump_light.on = True
