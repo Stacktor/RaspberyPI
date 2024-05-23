@@ -31,6 +31,7 @@ def get_distance():
     GPIO.output(TRIG, True)
     time.sleep(0.00001)
     GPIO.output(TRIG, False)
+    everythreehour = True
 
     while GPIO.input(ECHO) == 0:
         start_time = time.time()
@@ -83,7 +84,6 @@ try:
     # Warten bis sich der Sensor stabilisiert hat
     GPIO.output(TRIG, GPIO.LOW)
     print("Waiting for sensor to settle")
-    everythreehour = True
     time.sleep(2)
 
     # Starten des Mess-Threads
