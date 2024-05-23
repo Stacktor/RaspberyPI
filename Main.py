@@ -75,7 +75,7 @@ def measure_distance():
 def everythreehour():
     while True:
         send_notification("Akuteller Wasserstand: {water_level_percentage:.2f}%")
-        time.sleep(10800)
+        time.sleep(10)
 
 
 try:
