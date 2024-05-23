@@ -72,6 +72,11 @@ def measure_distance():
         
         print(f"Water Level: {water_level_percentage:.2f}%")
         time.sleep(1)
+def everythreehour():
+    while True:
+        send_notification("Akuteller Wasserstand: {water_level_percentage:.2f}%")
+        time.sleep(10800)
+
 
 try:
     # Warten bis sich der Sensor stabilisiert hat
@@ -82,6 +87,7 @@ try:
     # Starten des Mess-Threads
     measurement_thread = threading.Thread(target=measure_distance)
     measurement_thread.start()
+    everythreehour_thread = threading.Thread(target=everythreehour)
 
     # Hauptprogramm kann hier fortgesetzt werden
     while True:
