@@ -1,45 +1,91 @@
-import time
+#!/usr/bin/python3
 import RPi.GPIO as GPIO
-import PyFiglet
+import time
+import threading
+from phue import Bridge
+from pushover import Client
 
-print(figlet_format("Made by Thomas", font="big"))
+# Pin-Definitionen und Philips Hue Bridge
+TRIG = 7
+ECHO = 11
+bridge_ip = '192.168.0.137'
+b = Bridge(bridge_ip)
+b.connect()
 
-GPIO.setmode(GPIO.BCM)
-GPIO.setwarnings(False)
+pushover_user_key = 'DEIN_Pushover_USER_KEY'
+pushover_api_token = 'DEIN_Pushover_API_TOKEN'
 
-TRIG = 4
-ECHO = 17
+client = Client(pushover_user_key, api_token=pushover_api_token)
 
+GPIO.setmode(GPIO.BOARD)
 GPIO.setup(TRIG, GPIO.OUT)
 GPIO.setup(ECHO, GPIO.IN)
 
-GPIO.output(TRIG, False)
-time.sleep(2)
+MAX_WATER_LEVEL = 30.0  # Maximaler Wasserstand in cm
+CRITICAL_WATER_LEVEL = 95.0  # Kritischer Wasserstand in Prozent
+SAFE_WATER_LEVEL = 50.0  # Sicherer Wasserstand in Prozent
 
-print('[press ctrl+c to end the script]')
+pumpe_eingeschaltet = False
 
-try:  # Main program loop
+def get_distance():
+    GPIO.output(TRIG, True)
+    time.sleep(0.00001)
+    GPIO.output(TRIG, False)
+
+    while GPIO.input(ECHO) == 0:
+        start_time = time.time()
+    
+    while GPIO.input(ECHO) == 1:
+        end_time = time.time()
+
+    duration = end_time - start_time
+    distance = (duration * 34300) / 2
+    return distance
+
+def control_pump(turn_on):
+    global pumpe_eingeschaltet
+    lights = b.get_light_objects('name')
+    pump_light = lights['PumpSocket']
+
+    if turn_on and not pumpe_eingeschaltet:
+        pump_light.on = True
+        pumpe_eingeschaltet = True
+    elif not turn_on and pumpe_eingeschaltet:
+        pump_light.on = False
+        pumpe_eingeschaltet = False
+
+def send_notification(message):
+    client.send_message(message, title="Wasserstand Warnung")
+
+def measure_distance():
+    global pumpe_eingeschaltet
     while True:
-        GPIO.output(TRIG, True)
-        time.sleep(0.00001)
-        GPIO.output(TRIG, False)
+        distance = get_distance()
+        water_level_percentage = (MAX_WATER_LEVEL - distance) / MAX_WATER_LEVEL * 100
+        
+        if water_level_percentage >= CRITICAL_WATER_LEVEL:
+            control_pump(True)
+            send_notification(f"Wasserstand kritisch: {water_level_percentage:.2f}%")
+        elif water_level_percentage < SAFE_WATER_LEVEL and pumpe_eingeschaltet:
+            control_pump(False)
+        
+        print(f"Water Level: {water_level_percentage:.2f}%")
+        time.sleep(1)
 
-        while GPIO.input(ECHO) == 0:
-            pulse_start = time.time()
+try:
+    # Warten bis sich der Sensor stabilisiert hat
+    GPIO.output(TRIG, GPIO.LOW)
+    print("Waiting for sensor to settle")
+    time.sleep(2)
 
-        while GPIO.input(ECHO) == 1:
-            pulse_end = time.time()
+    # Starten des Mess-Threads
+    measurement_thread = threading.Thread(target=measure_distance)
+    measurement_thread.start()
 
-        pulse_duration = pulse_end - pulse_start
-        distance = pulse_duration * 17150
-        distance = round(distance, 2)
-
-        print('Distance is {} cm'.format(distance))
-        time.sleep(2)
-
-# Scavenging work after the end of the program
-except KeyboardInterrupt:
-    print('Script end!')
+    # Hauptprogramm kann hier fortgesetzt werden
+    while True:
+        # Hier kann weitere Logik hinzugefügt werden
+        time.sleep(10)  # Beispielhafte Wartezeit
 
 finally:
     GPIO.cleanup()
