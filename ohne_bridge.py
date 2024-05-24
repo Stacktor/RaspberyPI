@@ -37,9 +37,7 @@ def get_distance():
 def measure_distance():
     while True:
         distance = get_distance()
-        water_level_percentage = (MAX_WATER_LEVEL - distance) / MAX_WATER_LEVEL * 100
-        
-        print(f"Water Level: {water_level_percentage:.2f}%")
+        print(f"Distance: {distance:.2f} cm")
         time.sleep(1)
 
 # Das Hauptprogramm startet den Mess-Thread und enthält eine Schleife für weitere Logik.
