@@ -1,38 +1,63 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 import RPi.GPIO as GPIO
 import time
+import threading
 
+# Pin-Definitionen
+TRIG = 7  # GPIO Pin für TRIG des HC-SR04
+ECHO = 11  # GPIO Pin für ECHO des HC-SR04
+
+# GPIO-Modus und Pin-Konfiguration
+GPIO.setmode(GPIO.BOARD)
+GPIO.setup(TRIG, GPIO.OUT)
+GPIO.setup(ECHO, GPIO.IN)
+
+# Wasserstandskonfiguration
+MAX_WATER_LEVEL = 30.0  # Maximaler Wasserstand in cm
+CRITICAL_WATER_LEVEL = 80.0  # Kritischer Wasserstand in Prozent
+SAFE_WATER_LEVEL = 50.0  # Sicherer Wasserstand in Prozent
+
+# Funktion zur Distanzmessung mit dem HC-SR04
+def get_distance():
+    GPIO.output(TRIG, True)
+    time.sleep(0.00001)
+    GPIO.output(TRIG, False)
+
+    while GPIO.input(ECHO) == 0:
+        start_time = time.time()
+    
+    while GPIO.input(ECHO) == 1:
+        end_time = time.time()
+
+    duration = end_time - start_time
+    distance = (duration * 34300) / 2
+    return distance
+
+# Hauptfunktion zur Distanzmessung und Wasserstandsüberwachung
+def measure_distance():
+    while True:
+        distance = get_distance()
+        water_level_percentage = (MAX_WATER_LEVEL - distance) / MAX_WATER_LEVEL * 100
+        
+        print(f"Water Level: {water_level_percentage:.2f}%")
+        time.sleep(1)
+
+# Das Hauptprogramm startet den Mess-Thread und enthält eine Schleife für weitere Logik.
+# Bei Beendigung des Programms werden die GPIO-Pins sauber zurückgesetzt.
 try:
-      GPIO.setmode(GPIO.BOARD)
+    # Warten bis sich der Sensor stabilisiert hat
+    GPIO.output(TRIG, GPIO.LOW)
+    print("Waiting for sensor to settle")
+    time.sleep(2)
 
-      PIN_TRIGGER = 7
-      PIN_ECHO = 11
+    # Starten des Mess-Threads
+    measurement_thread = threading.Thread(target=measure_distance)
+    measurement_thread.start()
 
-      GPIO.setup(PIN_TRIGGER, GPIO.OUT)
-      GPIO.setup(PIN_ECHO, GPIO.IN)
-
-      GPIO.output(PIN_TRIGGER, GPIO.LOW)
-
-      print ("Waiting for sensor to settle")
-
-      time.sleep(2)
-
-      print ("Calculating distance")
-
-      GPIO.output(PIN_TRIGGER, GPIO.HIGH)
-
-      time.sleep(0.00001)
-
-      GPIO.output(PIN_TRIGGER, GPIO.LOW)
-
-      while GPIO.input(PIN_ECHO)==0:
-            pulse_start_time = time.time()
-      while GPIO.input(PIN_ECHO)==1:
-            pulse_end_time = time.time()
-
-      pulse_duration = pulse_end_time - pulse_start_time
-      distance = round(pulse_duration * 17150, 2)
-      print ("Distance:"),distance,"cm"
+    # Hauptprogramm kann hier fortgesetzt werden
+    while True:
+        # Hier kann weitere Logik hinzugefügt werden
+        time.sleep(10)  # Beispielhafte Wartezeit
 
 finally:
-      GPIO.cleanup()
+    GPIO.cleanup()
