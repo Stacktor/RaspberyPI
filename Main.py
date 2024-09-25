@@ -18,8 +18,8 @@ b = Bridge(bridge_ip)
 b.connect()
 
 # Pushover-API-Schlüssel und Token
-pushover_user_key = 'ua9k2jykcr83sxapyg8of9w33hzf9o'
-pushover_api_token = 'a4naf84gen6td7yyw21tn7s5qn7yho'
+pushover_user_key = ''
+pushover_api_token = ''
 client = Client(pushover_user_key, api_token=pushover_api_token)
 
 # GPIO-Modus und Pin-Konfiguration
